@@ -1,15 +1,17 @@
 require 'rubygems'
 require 'json'
 require 'xmlsimple'
+require 'pp'
 
 class SpriteMaster
   def initialize(options = {})
     @prefix = options[:prefix]
-    @img    = options[:img] + ".png"
+    @img    = get_filename options[:img], 'png'
     @master_keys = []
     @dst    = ""
-    @format = options[:format] || 'plist'
-    @src    = options[:src] + "." + @format
+    @src    = get_filename options[:src], 'plist'
+    @format = (get_extension @src)[0]
+
   end
   
   def generate_css
@@ -73,7 +75,7 @@ class SpriteMaster
   
   def generate_docs
     formatted_prefix = @prefix.capitalize
-    html = '<!doctype><html><head><title>Glyphicon Sprite Sheets</title><link href="' + @dst + '" rel="stylesheet">'
+    html = '<!doctype><html><head><title>' + formatted_prefix + ' Sprite Sheets</title><link href="' + @dst + '" rel="stylesheet">'
     html << '<style>
       ul { margin-top: 75px; }
       li {
@@ -115,5 +117,16 @@ class SpriteMaster
     else
       JSON.parse(File.read(src))
     end
+  end
+
+  # checks if a given filename has an extension, if it does not then it appends default extension to filename
+  def get_filename filename, extension = 'png'
+    file_extension = get_extension filename
+    filename = (file_extension.empty?) ? filename + '.' + extension : filename
+  end
+
+  # returns the extension of a given filename
+  def get_extension filename
+    filename.to_s.scan(/\.([\w+-]+)$/).flatten
   end
 end
