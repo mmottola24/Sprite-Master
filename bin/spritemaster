@@ -1,0 +1,59 @@
+#!/usr/bin/env ruby
+require 'spritemaster'
+require 'optparse'
+
+options = {}
+
+opt_parser = OptionParser.new do |opt|
+  opt.banner = "sprite_master [target] {options}"
+  opt.separator ""
+  opt.separator "Description"
+  opt.separator "    Sprite Master is a utility to automatically generate stylesheets and supporting docs from sprite sheets generated using Zwoptex.app"
+  opt.separator ""
+  opt.separator "Options"
+  opt.separator ""
+
+  opt.on('-i','--image [FILE]', 'path to sprited image, defaults to [target] with png extension') do |image|
+    options[:image] = image
+  end
+
+  opt.on('-p','--prefix [STRING]', 'string prepended to generated css classes and filenames') do |prefix|
+    options[:prefix] = prefix
+  end
+
+  opt.on('-v', '--version', 'displays version number') do
+    puts "Sprite Master 0.0.0"
+    exit
+  end
+
+  opt.on('-h', '--help', 'displays this help message') do
+    puts opt_parser
+    exit
+  end
+
+end
+
+opt_parser.parse!
+
+if !ARGV[0].nil?
+  sprite_master = SpriteMaster.new({
+     img: options[:image],
+     src: ARGV[0],
+     prefix: options[:prefix],
+   })
+  result = sprite_master.generate_css
+  unless result.nil?
+    puts "Generated css file: #{result}"
+  else
+    puts "Failed to generate css file!"
+  end
+
+  result = sprite_master.generate_docs
+  unless result.nil?
+    puts "Generated doc file: #{result}"
+  else
+    puts "Failed to generate docs!"
+  end
+else
+  puts "Invalid usage. Type sprite_master --help for assistance."
+end
