@@ -1,17 +1,15 @@
 require 'rubygems'
 require 'json'
 require 'xmlsimple'
-require 'pp'
 
 class SpriteMaster
   def initialize(options = {})
-    @prefix = options[:prefix]
-    @img    = get_filename options[:img], 'png'
-    @master_keys = []
+    @prefix = options[:prefix] || 'icon'
     @dst    = ""
-    @src    = get_filename options[:src], 'plist'
+    @src    = get_filename(options[:src], 'plist')
+    @img    = get_filename(options[:img], 'png') || @src.gsub('.plist','.png')
     @format = (get_extension @src)[0]
-
+    @master_keys = []
   end
   
   def generate_css
@@ -19,9 +17,11 @@ class SpriteMaster
     if @format == 'json'
       keys         = contents['plist']['dict']['dict'][0]['key']
       items        = contents['plist']['dict']['dict'][0]['dict']
-    else
+    elsif @format == 'plist'
       keys = contents['dict'][0]['dict'][0]['key']
       items = contents['dict'][0]['dict'][0]['dict']
+    else
+      write_fatal_error("Invalid Format of image (-i --image)")
     end
     css          = ''
     
@@ -40,7 +40,7 @@ class SpriteMaster
     keys.each do |key|
       # Take the key and remove prefixes to the file name
       name = key.gsub(/^\w*_[0-9]*_/i, "").gsub(/.png$/, "").gsub('_', '-').gsub('@2x', '-x2')
-      # Push into master keys file for parsing down above
+      # Push into master keys file for parsing down below
       @master_keys.push name
     end
     
@@ -121,12 +121,27 @@ class SpriteMaster
 
   # checks if a given filename has an extension, if it does not then it appends default extension to filename
   def get_filename filename, extension = 'png'
-    file_extension = get_extension filename
-    filename = (file_extension.empty?) ? filename + '.' + extension : filename
+    puts filename
+    unless filename.nil?
+      file_extension = get_extension filename
+      filename = (file_extension.empty?) ? filename + '.' + extension : filename
+    else
+      false
+    end
   end
 
   # returns the extension of a given filename
   def get_extension filename
-    filename.to_s.scan(/\.([\w+-]+)$/).flatten
+    unless filename.nil?
+      filename.to_s.scan(/\.([\w+-]+)$/).flatten 
+    else
+      false
+    end
+  end
+
+  # fatal error - prints error message to screen and exits
+  def write_fatal_error message
+    puts "Error: #{message}.  See spritemaster -h for usage"
+    exit
   end
 end
