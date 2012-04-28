@@ -67,9 +67,9 @@ class SpriteMaster
     file = File.open(@dst, 'w') { |f| f.write(css) }
     
     if file > 0
-      @dst
+      puts "Generated css file: #{@dst}"
     else
-      nil
+      puts "Failed to generate css file!"
     end
   end
   
@@ -103,9 +103,9 @@ class SpriteMaster
     file = File.open(filename, 'w') { |f| f.write(html) }  
     
     if file > 0
-      filename
+      puts "Generated doc file: #{filename}"
     else
-      nil
+      puts "Failed to generate docs!"
     end
   end
   
@@ -121,7 +121,6 @@ class SpriteMaster
 
   # checks if a given filename has an extension, if it does not then it appends default extension to filename
   def get_filename filename, extension = 'png'
-    puts filename
     unless filename.nil?
       file_extension = get_extension filename
       filename = (file_extension.empty?) ? filename + '.' + extension : filename
