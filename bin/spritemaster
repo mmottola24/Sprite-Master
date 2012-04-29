@@ -1,5 +1,11 @@
 #!/usr/bin/env ruby
-require 'spritemaster'
+begin
+  require 'spritemaster'
+rescue
+  require 'rubygems'
+  require 'spritemaster'
+end
+
 require 'optparse'
 
 options = {}
@@ -40,7 +46,7 @@ if !ARGV.nil? and !ARGV[0].nil?
   options[:src] = ARGV[0]
 
   # initialize sprite master
-  sprite_master = SpriteMaster.new options
+  sprite_master = Spritemaster::Spritemaster.new options
 
   # generate css output
   sprite_master.generate_css
